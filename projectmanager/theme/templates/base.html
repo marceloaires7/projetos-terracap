@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br" x-data class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terracap - DINEG</title>
+    <link rel="icon" type="image/png+xml" href="https://www.terracap.df.gov.br/templates/onepageterracap2019/favicon.png">
+    {% load static tailwind_tags %}
+    {% tailwind_css %}
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: auto;
+        }
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.body.addEventListener('showToast', function(evt) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: evt.detail.type,
+                title: evt.detail.message,
+                showConfirmButton: false,
+                timer: 3000
+            });
+        });
+    </script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        // Função para obter o token CSRF do cookie (método mais robusto)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Adiciona o token CSRF a todas as requisições HTMX não-GET
+        document.body.addEventListener('htmx:configRequest', function(event) {
+            let csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            }
+            if (csrfToken) {
+                event.detail.headers['X-CSRFToken'] = csrfToken;
+            }
+        });
+
+        // Dark mode logic
+        const setupDarkMode = () => {
+            const htmlElement = document.documentElement;
+            const isDarkMode = localStorage.getItem("theme") === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+            if (isDarkMode) {
+                htmlElement.classList.add("dark");
+            } else {
+                htmlElement.classList.remove("dark");
+            }
+        };
+
+        setupDarkMode();
+
+        window.toggleDarkMode = () => {
+            const htmlElement = document.documentElement;
+            if (htmlElement.classList.contains("dark")) {
+                htmlElement.classList.remove("dark");
+                localStorage.setItem("theme", "light");
+            } else {
+                htmlElement.classList.add("dark");
+                localStorage.setItem("theme", "dark");
+            }
+        };
+    </script>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 dark:text-gray-100">
+    <!-- Fundo com logo da Terracp -->
+    <div class="fixed inset-0 z-0 bg-bottom bg-no-repeat bg-cover opacity-10 pointer-events-none"
+         style="background-image: url('{% static 'img/terracap-fundo.png' %}');">
+    </div>
+    <div id="app-container" class="flex flex-col min-h-screen">
+        <!-- Navbar fixa no topo com bordas arredondadas -->
+        <nav class="w-full max-w-7xl mx-auto z-50 bg-white shadow-xl rounded-xl border border-gray-200 mt-4 dark:bg-gray-800 dark:border-gray-700">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'img/terracap-logo.png' %}" alt="Terracap" class="h-10">
+                        </div>
+                        <div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-4">
+                                <a href="{% url 'projects:list' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Lista de Projetos</a>
+                                <a href="{% url 'projects:create' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Novo Projeto</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-4 flex items-center md:ml-6">
+                            <button onclick="toggleDarkMode()" class="p-2 rounded-full text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M4 12H3m15.325 5.325l-.707.707M6.364 6.364l-.707-.707m12.728 0l-.707.707M6.364 17.636l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </button>
+                            <div class="relative ml-3">
+                                <div class="text-gray-700 px-4 py-2 dark:text-gray-300">
+                                    {% if user.is_authenticated %}
+                                        Olá, {{ user.username }} | 
+                                        <a href="{% url 'account_logout' %}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">Sair</a>
+                                    {% else %}
+                                        <a href="{% url 'account_login' %}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">Entrar</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Espaço para a navbar flutuante -->
+        <div class="h-12"></div>
+
+        <!-- Conteúdo Principal -->
+        <main class="flex-grow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-full">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-green-600 text-white py-4 dark:bg-green-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                &copy; {% now "Y" %} Projetos Terracap - DINEG. Todos os direitos reservados.
+            </div>
+        </footer>
+    </div>
+    <!-- Adiciona um token CSRF oculto para garantir que sempre exista um no DOM -->
+    <div style="display:none">
+        {% csrf_token %}
+    </div>
+</body>
+</html>

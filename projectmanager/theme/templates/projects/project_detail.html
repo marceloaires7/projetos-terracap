@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="bg-white shadow rounded-lg p-6 max-w-4xl mx-auto dark:bg-gray-800 dark:text-gray-100">
+    <h1 class="text-2xl font-bold mb-6">{{ project.name }}</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <!-- Informações Gerais -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">Informações Gerais</h2>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Líder do Projeto</p>
+                    <p class="font-medium">{{ project.lider }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Prioridade</p>
+                    <p class="font-medium">
+                        <span class="px-2 py-1 rounded-md 
+                        {% if project.prioridade == 'Alta' %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                        {% elif project.prioridade == 'Média' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100
+                        {% else %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100{% endif %}">
+                            {{ project.prioridade }}
+                        </span>
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Ciclo do Projeto</p>
+                    <p class="font-medium">{{ project.ciclo }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">GPP</p>
+                    <p class="font-medium">{{ project.get_GPP_display }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Mapeamento de Risco</p>
+                    <p class="font-medium">{{ project.get_mapRisk_display }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detalhes Técnicos -->
+        <div>
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">Detalhes Técnicos</h2>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Modelagem</p>
+                    <p class="font-medium">{{ project.modelagem }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Data de Início</p>
+                    <p class="font-medium">{{ project.data_inicio|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Data de Entrega</p>
+                    <p class="font-medium">
+                        {% if project.entrega %}
+                        {{ project.entrega|date:"d/m/Y" }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-600 dark:text-gray-300">Remuneração Prevista</p>
+                    <p class="font-medium">
+                        {% if project.remuneracao %}
+                        {{ project.remuneracao }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Descrições -->
+    <div class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-xl font-semibold mb-2">Processo SEI</h2>
+                <p class="text-gray-700 whitespace-pre-line dark:text-gray-200">{{ project.SEI|default:"-" }}</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold mb-2">Descrição do Projeto</h2>
+                <p class="text-gray-700 whitespace-pre-line dark:text-gray-200">{{ project.descricao|default:"-" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-xl font-semibold mb-2">Situação Atual</h2>
+                <p class="text-gray-700 whitespace-pre-line dark:text-gray-200">{{ project.situacao|default:"-" }}</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold mb-2">Meta do Planejamento Estratégico</h2>
+                <p class="text-gray-700 whitespace-pre-line dark:text-gray-200">{{ project.meta|default:"-" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Progresso -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div>
+            <h2 class="text-xl font-semibold mb-2">Progresso Planejado</h2>
+            <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+                <div class="bg-blue-600 h-4 rounded-full transition-all duration-300 dark:bg-blue-700"
+                     style="width: {{ project.progressoPlan|default_if_none:"0"|floatformat:0 }}%;"></div>
+            </div>
+            <p class="text-right mt-1">{{ project.progressoPlan|default_if_none:"0"|floatformat:0 }}%</p>
+        </div>
+        <div>
+            <h2 class="text-xl font-semibold mb-2">Progresso Realizado</h2>
+            <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+                <div class="bg-green-600 h-4 rounded-full transition-all duration-300 dark:bg-green-700"
+                     style="width: {{ project.progressoReal|default_if_none:"0"|floatformat:0 }}%;"></div>
+            </div>
+            <p class="text-right mt-1">{{ project.progressoReal|default_if_none:"0"|floatformat:0 }}%</p>
+        </div>
+    </div>
+    <div>
+        <h2 class="text-xl font-semibold mb-2 mt-8">Comentários</h2>
+        <form 
+            hx-post="{% url 'projects:add_comment' project.pk %}" 
+            hx-target="#comments-list" 
+            hx-swap="outerHTML"
+            hx-on::after-request="window.location.reload()"
+            method="post">
+            {% csrf_token %}
+            {{ comment_form.texto|as_crispy_field }}
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">Comentar</button>
+        </form>
+        <div id="comments-list">
+            {% include "projects/partials/comments_list.html" with comments=project.comments.all %}
+        </div>
+        
+        <h2 class="text-xl font-semibold mb-2 mt-8">Anexos</h2>
+        <form 
+            hx-post="{% url 'projects:add_attachment' project.pk %}" 
+            hx-target="#attachments-list" 
+            hx-swap="outerHTML"
+            hx-on::after-request="window.location.reload()"
+            enctype="multipart/form-data"
+            method="post">
+            {% csrf_token %}
+            {{ attachment_form.arquivo|as_crispy_field }}
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600">Anexar</button>
+        </form>
+        <div id="attachments-list">
+            {% include "projects/partials/attachments_list.html" with attachments=project.attachments.all %}
+        </div>
+    </div>
+        <!-- Botões -->
+    <div class="flex justify-end space-x-4">
+        <a href="{% url 'projects:update' project.pk %}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
+            Editar
+        </a>
+        <a href="{% url 'projects:list' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600">
+            Voltar
+        </a>
+    </div>
+</div>
+{% endblock %}

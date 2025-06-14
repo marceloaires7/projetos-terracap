@@ -1,0 +1,8 @@
+django
+django-tailwind
+django-crispy-forms
+crispy-tailwind
+django-allauth
+django-filter
+django-htmx
+django-money

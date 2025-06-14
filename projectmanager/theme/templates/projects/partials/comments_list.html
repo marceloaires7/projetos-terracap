@@ -1,0 +1,22 @@
+<!-- filepath: theme/templates/projects/partials/comments_list.html -->
+<ul class="dark:text-gray-100">
+    {% for comment in comments %}
+        <li class="mb-2">
+            <strong>{{ comment.user }}:</strong> {{ comment.texto }}
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ comment.criado_em|date:"d/m/Y H:i" }}</span>
+            {% if user.is_superuser %}
+                <a 
+                  hx-delete="{% url 'projects:delete_comment' project.pk comment.pk %}" 
+                  class="text-red-600 ml-2 cursor-pointer dark:text-red-400 dark:hover:text-red-300"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  hx-confirm="Tem certeza que deseja excluir este comentário?"
+                  hx-target="body"
+                  hx-swap="none"
+                  hx-on:htmx:afterOnConfirm="window.location.reload()"
+                >Deletar</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="dark:text-gray-300">Nenhum comentário ainda.</li>
+    {% endfor %}
+</ul>
